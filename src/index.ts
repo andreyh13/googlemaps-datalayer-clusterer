@@ -1,3 +1,3 @@
-function getDataLayerClustererClass(parentClass: google.maps.OverlayView) {}
+function getDataLayerClustererClass(parentClass: typeof google.maps.OverlayView) {}
 
 export default getDataLayerClustererClass;
