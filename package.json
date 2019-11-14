@@ -1,0 +1,31 @@
+{
+  "name": "googlemaps-datalayer-clusterer",
+  "version": "1.0.0",
+  "description": "Clusterer library for Google Maps JavaScript API data layer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andreyh13/googlemaps-datalayer-clusterer.git"
+  },
+  "keywords": [
+    "googlemaps",
+    "clusterer",
+    "datalayer"
+  ],
+  "author": "Andriy Khomenko",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/andreyh13/googlemaps-datalayer-clusterer/issues"
+  },
+  "homepage": "https://github.com/andreyh13/googlemaps-datalayer-clusterer#readme",
+  "devDependencies": {
+    "typescript": "^3.7.2"
+  },
+  "dependencies": {
+    "@types/googlemaps": "^3.38.0"
+  }
+}
