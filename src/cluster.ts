@@ -1,3 +1,4 @@
+import { DataLayerClusterer } from './clusterer';
 import { FeatureClusterIcon } from './clustericon';
 import {
   CLASS_NAME_DEFAULT,
@@ -7,7 +8,6 @@ import {
   PROP_HIDDEN,
 } from './constants';
 import { ClustererHelper } from './helper';
-import { DataLayerClusterer } from './index';
 import { IDimension } from './interfaces';
 
 export class FeatureCluster {

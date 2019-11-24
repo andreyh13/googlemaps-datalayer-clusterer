@@ -1,6 +1,6 @@
+import { DataLayerClusterer } from './clusterer';
 import { CLASS_NAME_DEFAULT } from './constants';
 import { ClustererHelper } from './helper';
-import { DataLayerClusterer } from './index';
 import { IStyle, ISums } from './interfaces';
 
 export class FeatureClusterIcon extends google.maps.OverlayView {

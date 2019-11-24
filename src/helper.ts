@@ -1,4 +1,4 @@
-import { DataLayerClusterer } from './index';
+import { DataLayerClusterer } from './clusterer';
 
 const hashFeatureCenters: Map<string | number, google.maps.LatLng> = new Map();
 const hashFeaturesBounds: Map<string | number, google.maps.LatLngBounds> = new Map();

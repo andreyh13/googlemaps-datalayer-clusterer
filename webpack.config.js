@@ -1,5 +1,6 @@
 const path = require('path');
-var CopyWebpackPlugin = require('copy-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
   entry: './src/index.ts',
@@ -17,12 +18,15 @@ module.exports = {
       },
     ],
   },
-  plugins: [new CopyWebpackPlugin([{ from: 'src/images', to: 'images' }])],
+  plugins: [new CleanWebpackPlugin(), new CopyWebpackPlugin([{ from: 'src/images', to: 'images' }])],
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
   },
   output: {
-    filename: 'bundle.js',
+    filename: 'datalayerclusterer.js',
     path: path.resolve(__dirname, 'lib'),
+    libraryTarget: 'var',
+    library: 'DataLayerClusterer',
+    libraryExport: 'Loader',
   },
 };
