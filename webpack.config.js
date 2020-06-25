@@ -18,7 +18,14 @@ module.exports = {
       },
     ],
   },
-  plugins: [new CleanWebpackPlugin(), new CopyWebpackPlugin([{ from: 'src/images', to: 'images' }])],
+  plugins: [
+    new CleanWebpackPlugin(),
+    new CopyWebpackPlugin({
+      patterns: [
+          { from: 'src/images', to: 'images' }
+      ]
+    })
+  ],
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
   },
