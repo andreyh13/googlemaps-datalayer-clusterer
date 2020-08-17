@@ -6,8 +6,14 @@ import { IDimension, IStyle, ISums } from './interfaces';
 import * as GeoJSON from 'geojson';
 
 const SIZES = [53, 56, 66, 78, 90];
-const hashFeatures: Map<string | number, google.maps.Data.Feature> = new Map<string | number, google.maps.Data.Feature>();
-const hashFeaturesReplace: Map<string | number, google.maps.Data.Feature> = new Map<string | number, google.maps.Data.Feature>();
+const hashFeatures: Map<string | number, google.maps.Data.Feature> = new Map<
+  string | number,
+  google.maps.Data.Feature
+>();
+const hashFeaturesReplace: Map<string | number, google.maps.Data.Feature> = new Map<
+  string | number,
+  google.maps.Data.Feature
+>();
 
 export class DataLayerClusterer extends google.maps.OverlayView {
   private pMap: google.maps.Map;
@@ -112,7 +118,7 @@ export class DataLayerClusterer extends google.maps.OverlayView {
 
   get numFeatures(): number {
     // Returns number of not hidden features
-    const availableFeatures = this.features.filter(feature => !feature.getProperty(PROP_HIDDEN));
+    const availableFeatures = this.features.filter((feature) => !feature.getProperty(PROP_HIDDEN));
     return availableFeatures.length;
   }
 
@@ -283,7 +289,10 @@ export class DataLayerClusterer extends google.maps.OverlayView {
     return f;
   }
 
-  public addGeoJson(geoJson: GeoJSON.FeatureCollection, options?: google.maps.Data.GeoJsonOptions): google.maps.Data.Feature[] {
+  public addGeoJson(
+    geoJson: GeoJSON.FeatureCollection,
+    options?: google.maps.Data.GeoJsonOptions,
+  ): google.maps.Data.Feature[] {
     const features = this.dataLayer.addGeoJson(geoJson, options);
     if (features.length) {
       for (const f of features) {
@@ -299,7 +308,7 @@ export class DataLayerClusterer extends google.maps.OverlayView {
   }
 
   public contains(feature: google.maps.Data.Feature): boolean {
-    return this.pFeatures.findIndex(f => f.getId() === feature.getId()) !== -1;
+    return this.pFeatures.findIndex((f) => f.getId() === feature.getId()) !== -1;
   }
 
   public forEach(callback: (feature: google.maps.Data.Feature) => void): void {
@@ -322,7 +331,7 @@ export class DataLayerClusterer extends google.maps.OverlayView {
     if (hashFeatures.has(id)) {
       return hashFeatures.get(id) ?? null;
     }
-    return this.features.find(feature => feature.getId() === id) ?? null;
+    return this.features.find((feature) => feature.getId() === id) ?? null;
   }
 
   public getStyle(): google.maps.Data.StylingFunction | google.maps.Data.StyleOptions {
@@ -334,7 +343,7 @@ export class DataLayerClusterer extends google.maps.OverlayView {
     options?: google.maps.Data.GeoJsonOptions,
     callback?: (features: google.maps.Data.Feature[]) => void,
   ): void {
-    return this.dataLayer.loadGeoJson(url, options, features => {
+    return this.dataLayer.loadGeoJson(url, options, (features) => {
       if (features.length) {
         for (const f of features) {
           this.dataLayer.remove(f);
@@ -356,7 +365,7 @@ export class DataLayerClusterer extends google.maps.OverlayView {
   }
 
   public remove(feature: google.maps.Data.Feature): void {
-    const index = this.pFeatures.findIndex(f => f.getId() === feature.getId());
+    const index = this.pFeatures.findIndex((f) => f.getId() === feature.getId());
     if (index !== -1) {
       this.removeFeatureAndAlternativeFromDataLayer(feature);
       this.pFeatures.splice(index, 1);
@@ -432,7 +441,7 @@ export class DataLayerClusterer extends google.maps.OverlayView {
   }
 
   /* eslint-disable */
-  public draw(): void { }
+  public draw(): void {}
   /* eslint-enable */
 
   /* ---- Builder pattern implementation ---- */
@@ -460,19 +469,8 @@ export class DataLayerClusterer extends google.maps.OverlayView {
   private sortClusters_(): void {
     for (let i = 1, j: number, tmp: FeatureCluster, tmpLng: number, length = this.pClusters.length; i < length; ++i) {
       tmp = this.pClusters[i];
-      tmpLng = tmp
-        .getBounds()
-        .getCenter()
-        .lng();
-      for (
-        j = i - 1;
-        j >= 0 &&
-        this.pClusters[j]
-          .getBounds()
-          .getCenter()
-          .lng() > tmpLng;
-        --j
-      ) {
+      tmpLng = tmp.getBounds().getCenter().lng();
+      for (j = i - 1; j >= 0 && this.pClusters[j].getBounds().getCenter().lng() > tmpLng; --j) {
         this.pClusters[j + 1] = this.pClusters[j];
       }
       this.pClusters[j + 1] = tmp;
@@ -598,7 +596,7 @@ export class DataLayerClusterer extends google.maps.OverlayView {
     SIZES.forEach((size, i) => {
       this.pStyles.push({
         height: size,
-        url: `${this.pImagePath}${(i + 1)}.${this.pImageExtension}`,
+        url: `${this.pImagePath}${i + 1}.${this.pImageExtension}`,
         width: size,
       });
     });

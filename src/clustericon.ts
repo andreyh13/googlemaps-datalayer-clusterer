@@ -163,7 +163,7 @@ export class FeatureClusterIcon extends google.maps.OverlayView {
   }
 
   get cluster(): FeatureCluster | undefined {
-    return this.clusterer?.clusters.find(cluster => cluster.getId() === this.id);
+    return this.clusterer?.clusters.find((cluster) => cluster.getId() === this.id);
   }
 
   get styles(): IStyle[] {
