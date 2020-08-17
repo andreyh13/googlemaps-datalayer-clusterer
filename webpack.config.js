@@ -3,14 +3,18 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
-  entry: './src/index.ts',
+  name: "configUmd",
+  entry: {
+    'datalayerclusterer': './src/index.ts',
+    'datalayerclusterer.min': './src/index.ts'
+  },
   devtool: 'inline-source-map',
   module: {
     rules: [
       {
         test: /\.tsx?$/,
-        use: 'ts-loader',
         exclude: /node_modules/,
+        loaders: ['babel-loader', 'ts-loader']
       },
       {
         test: /\.(png|svg|jpg|gif)$/,
@@ -18,14 +22,21 @@ module.exports = {
       },
     ],
   },
-  plugins: [new CleanWebpackPlugin(), new CopyWebpackPlugin([{ from: 'src/images', to: 'images' }])],
+  plugins: [
+    new CleanWebpackPlugin(),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'src/images', to: 'images' }
+      ]
+    })
+  ],
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
   },
   output: {
-    filename: 'datalayerclusterer.js',
+    filename: '[name].js',
     path: path.resolve(__dirname, 'lib'),
-    libraryTarget: 'var',
+    libraryTarget: 'umd',
     library: 'DataLayerClusterer',
     libraryExport: 'Loader',
   },

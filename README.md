@@ -1,5 +1,8 @@
 # DataLayer Clusterer for Google Maps JavaScript API v3
 
+[![npm version](http://img.shields.io/npm/v/googlemaps-datalayer-clusterer.svg?style=flat)](https://npmjs.org/package/googlemaps-datalayer-clusterer "View this project on npm") ![GitHub release (latest by date)](https://img.shields.io/github/v/release/andreyh13/googlemaps-datalayer-clusterer) ![license](https://img.shields.io/github/license/andreyh13/googlemaps-datalayer-clusterer)
+
+
 This is fast data layer features clustering library. It's working on top of the Data Layer of Google Maps JavaScript API v3 and maintain the same public methods as a standard [Data layer](https://developers.google.com/maps/documentation/javascript/reference/data).
 
 ## Getting Started

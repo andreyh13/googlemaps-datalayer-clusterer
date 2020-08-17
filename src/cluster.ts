@@ -23,7 +23,7 @@ export class FeatureCluster {
     this.map = map;
     this.center = center;
     this.id = ++FeatureCluster.counter;
-    this.calculateBounds_();
+    this.calculateBounds();
     this.icon = new FeatureClusterIcon(map, this.id);
   }
 
@@ -75,28 +75,28 @@ export class FeatureCluster {
   }
 
   public addFeature(feature: google.maps.Data.Feature): boolean {
-    if (this.isFeatureAlreadyAdded_(feature)) {
+    if (this.isFeatureAlreadyAdded(feature)) {
       return false;
     }
 
     if (
-      (feature.getGeometry().getType() !== 'Point' && !this.excludeFeatureBySize_(feature)) ||
+      (feature.getGeometry().getType() !== 'Point' && !this.excludeFeatureBySize(feature)) ||
       feature.getGeometry().getType() === 'Point'
     ) {
       feature.setProperty('clusterID', this.classId);
       this.features.push(feature);
-      this.updateClusterCenter_(feature);
+      this.updateClusterCenter(feature);
       if (this.features.length < this.minClusterSize) {
-        this.hideInCluster_(feature);
+        this.hideInCluster(feature);
       } else if (this.features.length === this.minClusterSize) {
         for (const f of this.features) {
-          this.showInCluster_(f);
+          this.showInCluster(f);
         }
       } else {
-        this.showInCluster_(feature);
+        this.showInCluster(feature);
       }
     } else {
-      this.hideInCluster_(feature);
+      this.hideInCluster(feature);
     }
     this.updateIcon();
     return true;
@@ -117,7 +117,7 @@ export class FeatureCluster {
     if (mz && zoom > mz) {
       // The zoom is greater than our max zoom so show all the features of cluster.
       for (const f of this.features) {
-        this.hideInCluster_(f);
+        this.hideInCluster(f);
       }
       return;
     }
@@ -142,11 +142,11 @@ export class FeatureCluster {
     return this.id;
   }
 
-  private isFeatureAlreadyAdded_(feature: google.maps.Data.Feature) {
+  private isFeatureAlreadyAdded(feature: google.maps.Data.Feature) {
     return this.features.indexOf(feature) !== -1;
   }
 
-  private hideInCluster_(feature: google.maps.Data.Feature): void {
+  private hideInCluster(feature: google.maps.Data.Feature): void {
     if (feature.getProperty(PROP_HIDDEN)) {
       this.clusterer?.removeFeatureAndAlternativeFromDataLayer(feature);
     } else {
@@ -154,27 +154,27 @@ export class FeatureCluster {
     }
   }
 
-  private showInCluster_(feature: google.maps.Data.Feature): void {
+  private showInCluster(feature: google.maps.Data.Feature): void {
     this.clusterer?.removeFeatureAndAlternativeFromDataLayer(feature);
   }
 
-  private updateClusterCenter_(feature: google.maps.Data.Feature): void {
+  private updateClusterCenter(feature: google.maps.Data.Feature): void {
     const centerPoint = ClustererHelper.featureCenter(feature);
     if (!this.center) {
       this.center = centerPoint;
-      this.calculateBounds_();
+      this.calculateBounds();
     } else {
       if (this.isAverageCenter) {
         const l = this.features.length + 1;
         const lat = (this.center.lat() * (l - 1) + centerPoint.lat()) / l;
         const lng = (this.center.lng() * (l - 1) + centerPoint.lng()) / l;
         this.center = new google.maps.LatLng(lat, lng);
-        this.calculateBounds_();
+        this.calculateBounds();
       }
     }
   }
 
-  private calculateBounds_(): void {
+  private calculateBounds(): void {
     const mBounds = new google.maps.LatLngBounds();
     if (this.center) {
       mBounds.extend(this.center);
@@ -182,7 +182,7 @@ export class FeatureCluster {
     this.bounds = this.clusterer?.getExtendedBounds(mBounds) ?? mBounds;
   }
 
-  private excludeFeatureBySize_(feature: google.maps.Data.Feature): boolean {
+  private excludeFeatureBySize(feature: google.maps.Data.Feature): boolean {
     const dim: IDimension = this.clusterer?.getFeatureDimensions(feature) ?? { xsize: 0, ysize: 0 };
     return Math.abs(dim.xsize) >= this.gridSize || Math.abs(dim.ysize) >= this.gridSize;
   }

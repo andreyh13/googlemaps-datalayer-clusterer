@@ -3,10 +3,11 @@ import { FeatureCluster } from './cluster';
 import { PROP_HIDDEN } from './constants';
 import { ClustererHelper } from './helper';
 import { IDimension, IStyle, ISums } from './interfaces';
+import * as GeoJSON from 'geojson';
 
 const SIZES = [53, 56, 66, 78, 90];
-const hashFeatures: Map<string | number, google.maps.Data.Feature> = new Map();
-const hashFeaturesReplace: Map<string | number, google.maps.Data.Feature> = new Map();
+const hashFeatures: Map<string | number, google.maps.Data.Feature> = new Map<string | number, google.maps.Data.Feature>();
+const hashFeaturesReplace: Map<string | number, google.maps.Data.Feature> = new Map<string | number, google.maps.Data.Feature>();
 
 export class DataLayerClusterer extends google.maps.OverlayView {
   private pMap: google.maps.Map;
@@ -22,14 +23,13 @@ export class DataLayerClusterer extends google.maps.OverlayView {
   private pDataLayer: google.maps.Data;
   private pFeatures: google.maps.Data.Feature[] = [];
   private pClusters: FeatureCluster[] = [];
-  private pReady: boolean = false;
-  private pPrevZoom: number = 1;
+  private pReady = false;
+  private pPrevZoom = 1;
   private pZoomChangedListener: google.maps.MapsEventListener | null = null;
   private pIdleListener: google.maps.MapsEventListener | null = null;
-  private pFirstIdle: boolean = true;
-  private pTilesReady: boolean = false;
-  private pChanges: number = 0;
-  private pReadyForFiltering = false;
+  private pFirstIdle = true;
+  private pTilesReady = false;
+  private pChanges = 0;
   private pCalculator: (features: google.maps.Data.Feature[], numStyles: number) => ISums;
 
   constructor(build: Builder) {
@@ -45,32 +45,32 @@ export class DataLayerClusterer extends google.maps.OverlayView {
     this.pZoomOnClick = build.zoomOnClick;
     this.pAverageCenter = build.averageCenter;
     this.pDataLayer = build.map?.data ?? new google.maps.Data();
-    this.pCalculator = this.calculator_;
-    this.init_();
+    this.pCalculator = this.calculatorDef.bind(this);
+    this.init();
   }
 
   /* ---- Getters ---- */
-  get map() {
+  get map(): google.maps.Map {
     return this.pMap;
   }
 
-  get gridSize() {
+  get gridSize(): number {
     return this.pGridSize;
   }
 
-  get minClusterSize() {
+  get minClusterSize(): number {
     return this.pMinClusterSize;
   }
 
-  get maxZoom() {
+  get maxZoom(): number {
     return this.pMaxZoom;
   }
 
-  get className() {
+  get className(): string {
     return this.pClassName;
   }
 
-  get styles() {
+  get styles(): IStyle[] {
     return this.pStyles;
   }
 
@@ -78,54 +78,54 @@ export class DataLayerClusterer extends google.maps.OverlayView {
     this.pStyles = styles;
   }
 
-  get calculator() {
+  get calculator(): (features: google.maps.Data.Feature[], numStyles: number) => ISums {
     return this.pCalculator;
   }
 
-  set calculator(calc) {
+  set calculator(calc: (features: google.maps.Data.Feature[], numStyles: number) => ISums) {
     this.pCalculator = calc;
   }
 
-  get imagePath() {
+  get imagePath(): string {
     return this.pImagePath;
   }
 
-  get imageExtension() {
+  get imageExtension(): string {
     return this.pImageExtension;
   }
 
-  get isZoomOnClick() {
+  get isZoomOnClick(): boolean {
     return this.pZoomOnClick;
   }
 
-  get isAverageCenter() {
+  get isAverageCenter(): boolean {
     return this.pAverageCenter;
   }
 
-  get dataLayer() {
+  get dataLayer(): google.maps.Data {
     return this.pDataLayer;
   }
 
-  get clusters() {
+  get clusters(): FeatureCluster[] {
     return this.pClusters;
   }
 
-  get numFeatures() {
+  get numFeatures(): number {
     // Returns number of not hidden features
     const availableFeatures = this.features.filter(feature => !feature.getProperty(PROP_HIDDEN));
     return availableFeatures.length;
   }
 
-  get hasFeatures() {
+  get hasFeatures(): boolean {
     // Returns true if there is at least one not hidden feature
     return this.numFeatures > 0;
   }
 
-  get features() {
+  get features(): google.maps.Data.Feature[] {
     // Returns sorted collection of all features
     if (this.pChanges) {
-      if (this.shouldUseInsertionSort_()) {
-        this.sortFeatures_();
+      if (this.shouldUseInsertionSort()) {
+        this.sortFeatures();
       } else {
         this.pFeatures.sort((a, b) => ClustererHelper.featureCenter(a).lng() - ClustererHelper.featureCenter(b).lng());
       }
@@ -137,8 +137,8 @@ export class DataLayerClusterer extends google.maps.OverlayView {
   /* ---- Public methods ---- */
   public setVisible(v: boolean): void {
     if (!v) {
-      this.removeEventListeners_();
-      this.resetViewport_();
+      this.removeEventListeners();
+      this.resetViewport();
       this.dataLayer.setMap(null);
       this.setMap(null);
     } else {
@@ -230,10 +230,10 @@ export class DataLayerClusterer extends google.maps.OverlayView {
   }
 
   public removeFeatureAndAlternativeFromDataLayer(feature: google.maps.Data.Feature): void {
-    this.removeFeatureFromDataLayer_(feature);
+    this.removeFeatureFromDataLayer(feature);
     if (feature.getGeometry().getType() !== 'Point') {
       const alternative = hashFeaturesReplace.has(feature.getId()) ? hashFeaturesReplace.get(feature.getId()) : feature;
-      this.removeFeatureFromDataLayer_(alternative ?? feature);
+      this.removeFeatureFromDataLayer(alternative ?? feature);
     }
   }
 
@@ -242,7 +242,7 @@ export class DataLayerClusterer extends google.maps.OverlayView {
     this.clusters.length = 0;
 
     if (this.hasFeatures) {
-      this.createClusters_();
+      this.createClusters();
     } else {
       for (const feature of this.features) {
         this.removeFeatureAndAlternativeFromDataLayer(feature);
@@ -260,8 +260,8 @@ export class DataLayerClusterer extends google.maps.OverlayView {
   }
 
   public destroy(): void {
-    this.resetViewport_();
-    this.removeEventListeners_();
+    this.resetViewport();
+    this.removeEventListeners();
     for (const feature of this.features) {
       this.removeFeatureAndAlternativeFromDataLayer(feature);
     }
@@ -277,19 +277,19 @@ export class DataLayerClusterer extends google.maps.OverlayView {
     this.dataLayer.remove(f);
     this.pFeatures.push(f);
     hashFeatures.set(f.getId(), f);
-    this.createAlternativePointFeature_(f);
+    this.createAlternativePointFeature(f);
     this.pChanges += 1;
     this.onAdd();
     return f;
   }
 
-  public addGeoJson(geoJson: object, options?: google.maps.Data.GeoJsonOptions): google.maps.Data.Feature[] {
+  public addGeoJson(geoJson: GeoJSON.FeatureCollection, options?: google.maps.Data.GeoJsonOptions): google.maps.Data.Feature[] {
     const features = this.dataLayer.addGeoJson(geoJson, options);
     if (features.length) {
       for (const f of features) {
         this.dataLayer.remove(f);
         hashFeatures.set(f.getId(), f);
-        this.createAlternativePointFeature_(f);
+        this.createAlternativePointFeature(f);
       }
       this.pFeatures.push(...features);
       this.pChanges += features.length;
@@ -339,7 +339,7 @@ export class DataLayerClusterer extends google.maps.OverlayView {
         for (const f of features) {
           this.dataLayer.remove(f);
           hashFeatures.set(f.getId(), f);
-          this.createAlternativePointFeature_(f);
+          this.createAlternativePointFeature(f);
         }
         this.pFeatures.push(...features);
         this.pChanges += features.length;
@@ -388,9 +388,11 @@ export class DataLayerClusterer extends google.maps.OverlayView {
     return this.dataLayer.setStyle(style);
   }
 
+  /* eslint-disable */
   public toGeoJson(callback: (json: object) => void): void {
     return this.dataLayer.toGeoJson(callback);
   }
+  /* eslint-enable */
 
   /* ---- google.maps.OverlayView interface methods ---- */
   public onAdd(): void {
@@ -406,7 +408,7 @@ export class DataLayerClusterer extends google.maps.OverlayView {
         const zoom = this.pMap.getZoom();
         if (this.pPrevZoom !== zoom) {
           this.pPrevZoom = zoom;
-          this.resetViewport_();
+          this.resetViewport();
         }
       });
     }
@@ -420,38 +422,37 @@ export class DataLayerClusterer extends google.maps.OverlayView {
         }
       });
     }
-    this.setReady_(true);
+    this.setReady(true);
   }
 
   public onRemove(): void {
-    this.removeEventListeners_();
+    this.removeEventListeners();
     this.dataLayer.setMap(null);
-    this.setReady_(false);
+    this.setReady(false);
   }
 
-  /* tslint:disable*/
-  public draw(): void {}
-  /* tslint:enable*/
+  /* eslint-disable */
+  public draw(): void { }
+  /* eslint-enable */
 
   /* ---- Builder pattern implementation ---- */
   static get Builder(): typeof Builder {
     return Builder;
   }
 
-  private resetViewport_(): void {
+  private resetViewport(): void {
     for (const cluster of this.pClusters) {
       cluster.remove();
     }
     this.pClusters = [];
   }
 
-  private setReady_(ready: boolean): void {
+  private setReady(ready: boolean): void {
     this.pReady = ready;
     if (ready) {
       if (this.hasFeatures && this.pFirstIdle && this.pTilesReady) {
-        this.createClusters_();
+        this.createClusters();
         this.pFirstIdle = false;
-        this.pReadyForFiltering = true;
       }
     }
   }
@@ -478,7 +479,7 @@ export class DataLayerClusterer extends google.maps.OverlayView {
     }
   }
 
-  private sortFeatures_(): void {
+  private sortFeatures(): void {
     for (
       let i = 1, j: number, tmp: google.maps.Data.Feature, tmpLng: number, length = this.pFeatures.length;
       i < length;
@@ -493,7 +494,7 @@ export class DataLayerClusterer extends google.maps.OverlayView {
     }
   }
 
-  private shouldUseInsertionSort_(): boolean {
+  private shouldUseInsertionSort(): boolean {
     if (this.pChanges > 300 || !this.pFeatures.length) {
       return false;
     } else {
@@ -501,11 +502,11 @@ export class DataLayerClusterer extends google.maps.OverlayView {
     }
   }
 
-  private indexLowerBoundLng_(lng: number): number {
+  private indexLowerBoundLng(lng: number): number {
     // It's a binary search algorithm
     let it: number;
     let step: number;
-    let first: number = 0;
+    let first = 0;
     let count = this.features.length;
     while (count > 0) {
       step = Math.floor(count / 2);
@@ -520,7 +521,7 @@ export class DataLayerClusterer extends google.maps.OverlayView {
     return first;
   }
 
-  private createClusters_(): void {
+  private createClusters(): void {
     if (!this.pReady || !this.getMap()) {
       return;
     }
@@ -528,7 +529,7 @@ export class DataLayerClusterer extends google.maps.OverlayView {
     const mapBounds = (this.getMap() as google.maps.Map).getBounds() ?? new google.maps.LatLngBounds();
     const extendedBounds = this.getExtendedBounds(mapBounds);
     // Binary search for the first interesting feature
-    const firstIndex = this.indexLowerBoundLng_(extendedBounds.getSouthWest().lng());
+    const firstIndex = this.indexLowerBoundLng(extendedBounds.getSouthWest().lng());
     const workingClusterList = this.pClusters.slice(0);
     for (let i = firstIndex, l = this.features.length; i < l; ++i) {
       const feature = this.features[i];
@@ -542,7 +543,7 @@ export class DataLayerClusterer extends google.maps.OverlayView {
         if (feature.getProperty(PROP_HIDDEN)) {
           this.removeFeatureAndAlternativeFromDataLayer(feature);
         } else {
-          let clusterFound = false;
+          let isClusterFound = false;
           let cluster: FeatureCluster;
           for (let j = 0, ll = workingClusterList.length; j < ll; ++j) {
             cluster = workingClusterList[j];
@@ -559,14 +560,14 @@ export class DataLayerClusterer extends google.maps.OverlayView {
 
             if (cluster.isFeatureInClusterBounds(feature)) {
               cluster.addFeature(feature);
-              clusterFound = true;
+              isClusterFound = true;
               break;
             }
           }
 
           // If the feature doesn't fit in any cluster,
           // we must create a brand new cluster.
-          if (!clusterFound) {
+          if (!isClusterFound) {
             const newCluster = new FeatureCluster(this.pMap, ClustererHelper.featureCenter(feature));
             newCluster.addFeature(feature);
             this.pClusters.push(newCluster);
@@ -577,33 +578,33 @@ export class DataLayerClusterer extends google.maps.OverlayView {
     }
   }
 
-  private init_(): void {
-    this.setupStyles_();
+  private init(): void {
+    this.setupStyles();
     if (this.pMap) {
       google.maps.event.addListenerOnce(this.pMap, 'tilesLoadedFirst', () => {
         this.pTilesReady = true;
         if (this.pReady) {
-          this.setReady_(this.pReady);
+          this.setReady(this.pReady);
         }
       });
       this.setMap(this.pMap);
     }
   }
 
-  private setupStyles_(): void {
+  private setupStyles(): void {
     if (this.pStyles.length) {
       return;
     }
     SIZES.forEach((size, i) => {
       this.pStyles.push({
         height: size,
-        url: this.pImagePath + (i + 1) + '.' + this.pImageExtension,
+        url: `${this.pImagePath}${(i + 1)}.${this.pImageExtension}`,
         width: size,
       });
     });
   }
 
-  private calculator_(features: google.maps.Data.Feature[], numStyles: number): ISums {
+  private calculatorDef(features: google.maps.Data.Feature[], numStyles: number): ISums {
     let index = 0;
     let dv = features.length;
     while (dv !== 0) {
@@ -618,24 +619,26 @@ export class DataLayerClusterer extends google.maps.OverlayView {
     };
   }
 
-  private removeEventListeners_(): void {
+  private removeEventListeners(): void {
     this.pZoomChangedListener?.remove();
     this.pIdleListener?.remove();
   }
 
-  private removeFeatureFromDataLayer_(feature: google.maps.Data.Feature): void {
+  private removeFeatureFromDataLayer(feature: google.maps.Data.Feature): void {
     if (this.dataLayer?.contains(feature)) {
       this.dataLayer.remove(feature);
     }
   }
 
-  private createAlternativePointFeature_(feature: google.maps.Data.Feature) {
+  private createAlternativePointFeature(feature: google.maps.Data.Feature) {
     if (feature.getGeometry().getType() !== 'Point') {
-      const featureProperties: any = {
+      const featureProperties: GeoJSON.GeoJsonProperties = {
         icon: 'ICON_ALTERNATIVE',
       };
-      feature.forEachProperty((value, name) => {
+      feature.forEachProperty((value: any, name: string) => {
+        /* eslint-disable */
         featureProperties[name] = value;
+        /* eslint-enable */
       });
       const f = new google.maps.Data.Feature({
         geometry: ClustererHelper.featureCenter(feature),
