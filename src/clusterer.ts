@@ -432,6 +432,7 @@ export class DataLayerClusterer extends google.maps.OverlayView {
       });
     }
     this.setReady(true);
+    google.maps.event.trigger(this.pMap, 'idle');
   }
 
   public onRemove(): void {
@@ -441,7 +442,7 @@ export class DataLayerClusterer extends google.maps.OverlayView {
   }
 
   /* eslint-disable */
-  public draw(): void {}
+  public draw(): void { }
   /* eslint-enable */
 
   /* ---- Builder pattern implementation ---- */
