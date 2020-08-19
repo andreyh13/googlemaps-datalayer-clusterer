@@ -144,6 +144,12 @@ In order to add features to the clusterer you should use `addGeoJson()` or `load
 
 The live demo is available at [https://maps-tools-242a6.firebaseapp.com/clusterer/demos/datalayerclusterer.html](https://maps-tools-242a6.firebaseapp.com/clusterer/demos/datalayerclusterer.html)
 
+Stackblitz samples:
+
+- [JavaScript](https://stackblitz.com/edit/js-avzfed)
+- [Angular](https://stackblitz.com/edit/angular-ivy-wkmgrz)
+- [React](https://stackblitz.com/edit/react-ts-vjmk8w)
+
 ## Licence
 
 The source code of this library is licensed under the MIT License.
