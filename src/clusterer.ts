@@ -303,6 +303,7 @@ export class DataLayerClusterer extends google.maps.OverlayView {
       this.pFeatures.push(...features);
       this.pChanges += features.length;
       this.onAdd();
+      this.redraw();
     }
     return features;
   }
@@ -357,6 +358,9 @@ export class DataLayerClusterer extends google.maps.OverlayView {
         callback(features);
       }
       this.onAdd();
+      if (this.numFeatures > 0) {
+        this.redraw();
+      }
     });
   }
 
@@ -432,7 +436,6 @@ export class DataLayerClusterer extends google.maps.OverlayView {
       });
     }
     this.setReady(true);
-    google.maps.event.trigger(this.pMap, 'idle');
   }
 
   public onRemove(): void {
@@ -442,7 +445,7 @@ export class DataLayerClusterer extends google.maps.OverlayView {
   }
 
   /* eslint-disable */
-  public draw(): void {}
+  public draw(): void { }
   /* eslint-enable */
 
   /* ---- Builder pattern implementation ---- */
